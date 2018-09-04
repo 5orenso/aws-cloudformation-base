@@ -44,6 +44,7 @@ $ bash ./bin/create-stack.sh --template iam-users
 
 ## Other Resources
 
+* [AWS Basic setup with Cloudformation](https://github.com/5orenso/aws-cloudformation-base)
 * [AWS Lambda boilerplate](https://github.com/5orenso/aws-lambda-boilerplate)
 * [Automated AWS Lambda update](https://github.com/5orenso/aws-lambda-autodeploy-lambda)
 * [AWS API Gateway setup with Cloudformation](https://github.com/5orenso/aws-cloudformation-api-gateway)
