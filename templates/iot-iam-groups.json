@@ -1,0 +1,125 @@
+{
+    "AWSTemplateFormatVersion" : "2010-09-09",
+    "Parameters": {
+    },
+    "Description": "Base groups",
+    "Resources": {
+        "baseDeveloperGroup": {
+            "Type": "AWS::IAM::Group",
+            "Properties": {
+                "GroupName": "base-developer"
+            }
+        },
+        "baseDeveloperGroupPolicy": {
+            "Type": "AWS::IAM::Policy",
+            "DependsOn": [
+                "baseDeveloperGroup"
+            ],
+            "Properties": {
+                "Groups": [
+                    "base-developer"
+                ],
+                "PolicyName": "base-developer-policy",
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": ["rds:*"],
+                            "Resource": "*"
+                        }, {
+                            "Effect": "Allow",
+                            "Action": ["cloudformation:*"],
+                            "Resource": "*"
+                        }, {
+                            "Effect": "Allow",
+                            "Action": ["iam:*"],
+                            "Resource": "*"
+                        }, {
+                            "Effect": "Allow",
+                            "Action": ["sns:*"],
+                            "Resource": {
+                                "Fn::Join": ["", ["arn:aws:sns:*:", {"Ref": "AWS::AccountId"}, ":base-${aws:username}-*"]]
+                            }
+                        }, {
+                            "Effect": "Allow",
+                            "Action": ["cloudwatch:*"],
+                            "Resource": "*"
+                        }, {
+                            "Effect": "Allow",
+                            "Action": ["ec2:*"],
+                            "Resource": "*"
+                        }, {
+                            "Effect": "Allow",
+                            "Action": ["lambda:*"],
+                            "Resource": "*"
+                        }, {
+                            "Effect": "Allow",
+                            "Action": ["sns:*"],
+                            "Resource": {
+                                "Fn::Join": ["", ["arn:aws:sns:*:", {"Ref": "AWS::AccountId"}, ":base-${aws:username}-*"]]
+                            }
+                        }, {
+                            "Effect": "Allow",
+                            "Action": ["s3:*"],
+                            "Resource": [
+                                "arn:aws:s3:::base-*"
+                            ]
+                        }, {
+                            "Effect": "Allow",
+                            "Action": ["rds:*"],
+                            "Resource": "*"
+                        }, {
+                            "Effect": "Allow",
+                            "Action": [
+                                "s3:GetBucketLocation",
+                                "s3:ListAllMyBuckets"
+                            ],
+                            "Resource": "arn:aws:s3:::*"
+                        }, {
+                            "Effect": "Allow",
+                            "Action": ["elasticloadbalancing:*"],
+                            "Resource": "*"
+                        },{
+                            "Effect": "Allow",
+                            "Action": ["autoscaling:*"],
+                            "Resource": "*"
+                        }
+                    ]
+                }
+            }
+        },
+
+        "baseDeveloperGroupCloudWatchFullAccess": {
+            "Type": "AWS::IAM::Group",
+            "Properties": {
+                "GroupName": "cloudwatch-full-access"
+            }
+        },
+        "baseDeveloperGroupPolicyCloudwatchFullAccess": {
+            "Type": "AWS::IAM::Policy",
+            "DependsOn": [
+                "baseDeveloperGroupCloudWatchFullAccess"
+            ],
+            "Properties": {
+                "Groups": [
+                    "cloudwatch-full-access"
+                ],
+                "PolicyName": "cloudwatch-full-access-policy",
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "cloudwatch:PutMetricData"
+                            ],
+                            "Resource": "*"
+                        }
+                    ]
+                }
+            }
+        },
+
+    }
+}

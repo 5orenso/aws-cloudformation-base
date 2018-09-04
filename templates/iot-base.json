@@ -1,0 +1,225 @@
+{
+    "AWSTemplateFormatVersion" : "2010-09-09",
+    "Parameters": {
+    },
+    "Description": "Base base setup.",
+    "Resources" : {
+        "baseVPC" : {
+            "Type" : "AWS::EC2::VPC",
+            "Properties" : {
+                "CidrBlock" : "10.1.0.0/16",
+    	        "EnableDnsSupport" : "true",
+    	        "EnableDnsHostnames" : "true",
+                "InstanceTenancy" : "default",
+                "Tags" : [ { "Key" : "Name", "Value" : "base-vpc" } ]
+            }
+        },
+        "baseInternetGateway" : {
+            "Type" : "AWS::EC2::InternetGateway",
+            "DependsOn": ["baseVPC"],
+            "Properties" : {
+                "Tags" : [ {"Key" : "Name", "Value" : "base-internetgateway"}]
+            }
+        },
+        "baseInternetGatewayAttachment" : {
+            "Type" : "AWS::EC2::VPCGatewayAttachment",
+            "DependsOn": ["baseInternetGateway"],
+            "Properties" : {
+                "VpcId" : {"Ref" : "baseVPC"},
+                "InternetGatewayId" : {"Ref" : "baseInternetGateway"}
+            }
+        },
+        "baseSubnetA" : {
+            "Type" : "AWS::EC2::Subnet",
+            "Description" : "Add default subnet for eu-west-1a",
+            "Properties" : {
+                "VpcId" : { "Ref" : "baseVPC" },
+                "CidrBlock" : "10.1.16.0/20",
+                "AvailabilityZone" : { "Fn::Select": [ "0", { "Fn::GetAZs": { "Ref": "AWS::Region" } } ]},
+                "Tags" : [
+                    { "Key" : "Name", "Value" : "base-subnet-a" },
+                    { "Key" : "Application", "Value" : { "Ref" : "AWS::StackName" } }
+                ]
+            }
+        },
+        "baseSubnetB" : {
+            "Type" : "AWS::EC2::Subnet",
+            "Description" : "Add default subnet for eu-west-1b",
+            "Properties" : {
+                "VpcId" : { "Ref" : "baseVPC" },
+                "CidrBlock" : "10.1.32.0/20",
+                "AvailabilityZone" : { "Fn::Select": [ "1", { "Fn::GetAZs": { "Ref": "AWS::Region" } } ]},
+                "Tags" : [
+                    { "Key" : "Name", "Value" : "base-subnet-b" },
+                    { "Key" : "Application", "Value" : { "Ref" : "AWS::StackName" } }
+                ]
+            }
+        },
+        "baseSubnetC" : {
+            "Type" : "AWS::EC2::Subnet",
+            "Description" : "Add default subnet for eu-west-1c",
+            "Properties" : {
+                "VpcId" : { "Ref" : "baseVPC" },
+                "CidrBlock" : "10.1.0.0/20",
+                "AvailabilityZone" : { "Fn::Select": [ "2", { "Fn::GetAZs": { "Ref": "AWS::Region" } } ]},
+                "Tags" : [
+                    { "Key" : "Name", "Value" : "base-subnet-c" },
+                    { "Key" : "Application", "Value" : { "Ref" : "AWS::StackName" } }
+                ]
+            }
+        },
+
+        "baseSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "VpcId" : { "Ref" : "baseVPC" },
+                "GroupDescription": "Security Group for servers in out default VPC",
+                "Tags": [
+                    { "Key": "Name", "Value": "base-subnet-sg" }
+                ]
+            }
+        },
+        "baseSecurityGroupOutboundRule": {
+            "Type": "AWS::EC2::SecurityGroupEgress",
+            "Properties": {
+                "IpProtocol": "tcp",
+                "FromPort": "0",
+                "ToPort": "65535",
+                "CidrIp": "0.0.0.0/0",
+                "GroupId": { "Fn::GetAtt": [ "baseSecurityGroup", "GroupId" ] }
+            }
+        },
+        "baseSecurityGroupInboundRuleSSH": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "IpProtocol": "tcp",
+                "FromPort": "22",
+                "ToPort": "22",
+                "CidrIp": "0.0.0.0/0",
+                "GroupId": { "Fn::GetAtt": [ "baseSecurityGroup", "GroupId"] }
+            }
+        },
+        "baseSecurityGroupInboundRuleHTTP": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "IpProtocol": "tcp",
+                "FromPort": "80",
+                "ToPort": "80",
+                "CidrIp": "0.0.0.0/0",
+                "GroupId": { "Fn::GetAtt": [ "baseSecurityGroup", "GroupId"] }
+            }
+        },
+        "baseSecurityGroupInboundRuleHTTPS": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "IpProtocol": "tcp",
+                "FromPort": "443",
+                "ToPort": "443",
+                "CidrIp": "0.0.0.0/0",
+                "GroupId": { "Fn::GetAtt": [ "baseSecurityGroup", "GroupId"] }
+            }
+        },
+        "baseRouteTable" : {
+            "Type" : "AWS::EC2::RouteTable",
+            "Description" : "Base VPC route table.",
+            "Properties" : {
+                "VpcId" : { "Ref" : "baseVPC" },
+                "Tags" : [
+                    { "Key" : "Name", "Value" : "base-default" },
+                    { "Key" : "Application", "Value" : { "Ref" : "AWS::StackName" } }
+                ]
+            }
+        },
+        "baseMainRoute" : {
+            "Type" : "AWS::EC2::Route",
+            "Description" : "Add default route from this VPC. We probably want to throw all unknown traffic to the internet.",
+            "DependsOn": [
+                "baseRouteTable", "baseInternetGatewayAttachment"
+            ],
+            "Properties" : {
+                "RouteTableId" : { "Ref" : "baseRouteTable" },
+                "DestinationCidrBlock" : "0.0.0.0/0",
+                "GatewayId" : { "Ref" : "baseInternetGateway" }
+            }
+        },
+        "baseSubnetAssociationA" : {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "DependsOn": [
+                "baseRouteTable", "baseSubnetA"
+            ],
+            "Properties" : {
+                "SubnetId" : { "Ref" : "baseSubnetA" },
+                "RouteTableId" : { "Ref" : "baseRouteTable" }
+            }
+        },
+        "baseSubnetAssociationB" : {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "DependsOn": [
+                "baseRouteTable", "baseSubnetB"
+            ],
+            "Properties" : {
+                "SubnetId" : { "Ref" : "baseSubnetB" },
+                "RouteTableId" : { "Ref" : "baseRouteTable" }
+            }
+        },
+        "baseSubnetAssociationC" : {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "DependsOn": [
+                "baseRouteTable", "baseSubnetC"
+            ],
+            "Properties" : {
+                "SubnetId" : { "Ref" : "baseSubnetC" },
+                "RouteTableId" : { "Ref" : "baseRouteTable" }
+            }
+        },
+        "baseMqttBrokerElasticIp" : {
+            "Type" : "AWS::EC2::EIP",
+            "Properties" : {
+                "Domain" : "vpc"
+            }
+        }
+    },
+
+    "Outputs": {
+        "baseVPC" : {
+            "Description" : "Base VPC",
+            "Value" : { "Ref" : "baseVPC" },
+            "Export" : { "Name" : "baseVPC" }
+        },
+        "outputBaseSubnetA" : {
+            "Description" : "Base Subnet A",
+            "Value" : { "Ref" : "baseSubnetA" },
+            "Export" : { "Name" : "baseSubnetA" }
+        },
+        "outputBaseSubnetB" : {
+            "Description" : "Base Subnet B",
+            "Value" : { "Ref" : "baseSubnetB" },
+            "Export" : { "Name" : "baseSubnetB" }
+        },
+        "outputBaseSubnetC" : {
+            "Description" : "Base Subnet C",
+            "Value" : { "Ref" : "baseSubnetC" },
+            "Export" : { "Name" : "baseSubnetC" }
+        },
+        "outputBaseSecurityGroup" : {
+            "Description" : "Base Security Group",
+            "Value" : { "Ref" : "baseSecurityGroup" },
+            "Export" : { "Name" : "baseSecurityGroup" }
+        },
+        "outputBaseRouteTable" : {
+            "Description" : "Base Routing table",
+            "Value" : { "Ref" : "baseRouteTable" },
+            "Export" : { "Name" : "baseRouteTable" }
+        },
+        "outputbaseMqttBrokerElasticIp" : {
+            "Description" : "Base Mqtt Broker Elastic IP",
+            "Value" : { "Ref" : "baseMqttBrokerElasticIp" },
+            "Export" : { "Name" : "baseMqttBrokerElasticIp" }
+        },
+        "outputbaseMqttBrokerElasticIpAllocationId" : {
+            "Description" : "Base Mqtt Broker Elastic IP allocation id",
+            "Value" : { "Fn::GetAtt" : ["baseMqttBrokerElasticIp", "AllocationId"] },
+            "Export" : { "Name" : "baseMqttBrokerElasticIpAllocationId" }
+        }
+    }
+}

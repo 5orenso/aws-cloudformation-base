@@ -1,0 +1,81 @@
+{
+    "AWSTemplateFormatVersion" : "2010-09-09",
+    "Parameters": {
+    },
+    "Description": "IoT users",
+    "Resources": {
+        "userOisteinSorensen": {
+            "Type": "AWS::IAM::User",
+            "Properties": {
+                "UserName": "OisteinSorensen",
+                "Groups": [
+                    "iot-developer"
+                ]
+            }
+       },
+
+        "userPolicyAllowUserToManageOwnMfaDevice": {
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "Groups": [
+                    "iot-developer"
+                ],
+                "PolicyName": "allow-user-to-manage-own-mfa-device",
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Sid": "AllowUsersToCreateEnableResyncTheirOwnVirtualMFADevice",
+                            "Effect": "Allow",
+                            "Action": [
+                                "iam:CreateVirtualMFADevice",
+                                "iam:EnableMFADevice",
+                                "iam:ResyncMFADevice",
+                                "iam:ChangePassword"
+                            ],
+                            "Resource": [
+                                {
+                                    "Fn::Join": ["", ["arn:aws:iam::", {"Ref": "AWS::AccountId"}, ":mfa/${aws:username}"]]
+                                },
+                                {
+                                    "Fn::Join": ["", ["arn:aws:iam::", {"Ref": "AWS::AccountId"}, ":user/${aws:username}"]]
+                                }
+                            ]
+                        },
+                        {
+                            "Sid": "AllowUsersToDeactivateDeleteTheirOwnVirtualMFADevice",
+                            "Effect": "Allow",
+                            "Action": [
+                                "iam:DeactivateMFADevice",
+                                "iam:DeleteVirtualMFADevice"
+                            ],
+                            "Resource": [
+                                {
+                                    "Fn::Join": ["", ["arn:aws:iam::", {"Ref": "AWS::AccountId"}, ":mfa/${aws:username}"]]
+                                },
+                                {
+                                    "Fn::Join": ["", ["arn:aws:iam::", {"Ref": "AWS::AccountId"}, ":user/${aws:username}"]]
+                                }
+                            ],
+                            "Condition": {
+                                "Bool": {
+                                    "aws:MultiFactorAuthPresent": true
+                                }
+                            }
+                        },
+                        {
+                            "Sid": "AllowUsersToListMFADevicesandUsersForConsole",
+                            "Effect": "Allow",
+                            "Action": [
+                                "iam:ListMFADevices",
+                                "iam:ListVirtualMFADevices",
+                                "iam:ListUsers"
+                            ],
+                            "Resource": "*"
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}
