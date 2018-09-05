@@ -171,12 +171,6 @@
                 "SubnetId" : { "Ref" : "baseSubnetC" },
                 "RouteTableId" : { "Ref" : "baseRouteTable" }
             }
-        },
-        "baseMqttBrokerElasticIp" : {
-            "Type" : "AWS::EC2::EIP",
-            "Properties" : {
-                "Domain" : "vpc"
-            }
         }
     },
 
@@ -210,16 +204,6 @@
             "Description" : "Base Routing table",
             "Value" : { "Ref" : "baseRouteTable" },
             "Export" : { "Name" : "baseRouteTable" }
-        },
-        "outputbaseMqttBrokerElasticIp" : {
-            "Description" : "Base Mqtt Broker Elastic IP",
-            "Value" : { "Ref" : "baseMqttBrokerElasticIp" },
-            "Export" : { "Name" : "baseMqttBrokerElasticIp" }
-        },
-        "outputbaseMqttBrokerElasticIpAllocationId" : {
-            "Description" : "Base Mqtt Broker Elastic IP allocation id",
-            "Value" : { "Fn::GetAtt" : ["baseMqttBrokerElasticIp", "AllocationId"] },
-            "Export" : { "Name" : "baseMqttBrokerElasticIpAllocationId" }
         }
     }
 }

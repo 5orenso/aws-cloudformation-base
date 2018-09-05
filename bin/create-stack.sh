@@ -43,7 +43,7 @@ while [[ $# > 0 ]]; do
     shift # past argument or value
 done
 
-STACK_NAME=${STACK_NAME:-"iot-${TEMPLATE}"}
+STACK_NAME=${STACK_NAME:-"basic-${TEMPLATE}"}
 STACK_ACTION="create-stack"
 if [ ! -z "$UPDATE_STACK" ]; then
     STACK_ACTION="update-stack"
@@ -84,12 +84,12 @@ fi
 echo "Running \"${STACK_ACTION}\" on stack \"${STACK_NAME}\""
 if [ -z "${TEMPLATE}" ]; then
     aws cloudformation ${STACK_ACTION} --region ${AWS_REGION} ${AWS_PROFILE} --stack-name ${STACK_NAME} \
-        --template-body file://${DIR}/../templates/iot-${TEMPLATE}.json --capabilities CAPABILITY_IAM
+        --template-body file://${DIR}/../templates/basic-${TEMPLATE}.json --capabilities CAPABILITY_IAM
 else
     echo 'Running aws cloudformation:'
     aws cloudformation ${STACK_ACTION} --region ${AWS_REGION} ${AWS_PROFILE} --stack-name ${STACK_NAME} \
-        --template-body file://${DIR}/../templates/iot-${TEMPLATE}.json --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM\
-        --parameters file://${DIR}/../params/iot-${TEMPLATE}.json
+        --template-body file://${DIR}/../templates/basic-${TEMPLATE}.json --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM\
+        --parameters file://${DIR}/../params/basic-${TEMPLATE}.json
 fi
 
 echo "Waiting for stack \"${STACK_NAME}\" to finish action \"${STACK_ACTION}\""
