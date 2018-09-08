@@ -12,7 +12,7 @@ With this basic setup you are ready to start launching servers and start develop
 __This should only be run once!__
 
 ```bash
-# Create the base API setup
+# Create the base setup
 $ bash ./bin/create-stack.sh --template base
 
 # Create new iot groups
@@ -29,7 +29,7 @@ $ bash ./bin/create-stack.sh --template iam-users
 After every change you can run this command to update the stack.
 
 ```bash
-# Update the base API setup
+# Update the base setup setup
 $ bash ./bin/create-stack.sh --template base --update-stack
 
 # Update iot groups
@@ -45,6 +45,7 @@ $ bash ./bin/create-stack.sh --template iam-users
 ## Other Resources
 
 * [AWS Basic setup with Cloudformation](https://github.com/5orenso/aws-cloudformation-base)
+* [AWS Server setup with Cloudformation](https://github.com/5orenso/aws-cloudformation-servers)
 * [AWS Lambda boilerplate](https://github.com/5orenso/aws-lambda-boilerplate)
 * [Automated AWS Lambda update](https://github.com/5orenso/aws-lambda-autodeploy-lambda)
 * [AWS API Gateway setup with Cloudformation](https://github.com/5orenso/aws-cloudformation-api-gateway)
